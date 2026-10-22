@@ -25,6 +25,9 @@ const getAllEvents = async (req, res) => {
   }
 }
 
+/**
+ * Controller to get a specific event by its ID from the database
+ */
 const getEventById = async (req, res) => {
   try {
     const event = await eventModel.findById(req.params.id);
@@ -39,8 +42,33 @@ const getEventById = async (req, res) => {
   }
 }
 
+const createEvent = async (req, res) => {
+  try {
+    const {title, description, date, location, category, totalSeats, availableSeats, ticketPrice, imageUrl} = req.body;
+
+    const event = await eventModel.create({
+      title,
+      description,
+      date,
+      location,
+      category,
+      totalSeats,
+      availableSeats,
+      ticketPrice,
+      imageUrl
+    });
+
+    res.status(201).json(event);
+  }
+  catch(error) {
+    console.error('Error in createEvent:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
+
 module.exports = {
   getAllEvents,
   getEventById,
+  createEvent
 }
 
