@@ -1,7 +1,11 @@
 const express = require('express');
 const { protect, admin } = require('../middlewares/auth.middleware');
-const { sendBookingOtp, bookEvent, confirmBooking } = require('../controllers/booking.controller');
+const { getBookings , sendBookingOtp, bookEvent, confirmBooking } = require('../controllers/booking.controller');
 const router = express.Router();
+
+
+// Show all bookings - api/bookings
+router.get('/my', protect, getBookings);
 
 // Book an event - api/bookings
 router.post('/send-otp', protect, sendBookingOtp);

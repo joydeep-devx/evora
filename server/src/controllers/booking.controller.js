@@ -5,6 +5,23 @@ const { sendOtpEmail, sendBookingEmail } = require('../services/email.service');
 
 
 /**
+ * Get all bookings for the logged-in user
+ */
+const getBookings = async (req, res) => {
+  try {
+    const bookings = req.user.role === 'admin'
+      ? await Booking.find().populate('eventId').populate('userId', 'name email').sort({ createdAt: -1 })
+      : await Booking.find({ userId: req.user.id }).populate('eventId').sort({ createdAt: -1 });
+
+    res.status(200).json({ bookings });
+  }
+  catch (error) {
+    console.error('Error fetching user bookings:', error);
+    res.status(500).json({ message: 'Failed to fetch bookings. Please try again later.' });
+  }
+}
+
+/**
  * Send OTP to user's email for booking verification
  */
 const sendBookingOtp = async (req, res) => {
@@ -67,6 +84,9 @@ const bookEvent = async (req, res) => {
   }
 }
 
+/**
+ * Admin route to confirm booking and update payment status
+ */
 const confirmBooking = async (req, res) => {
   try {
     const { paymentStatus } = req.body;
@@ -122,7 +142,10 @@ const confirmBooking = async (req, res) => {
   }
 }
 
+
+
 module.exports = {
+  getBookings,
   sendBookingOtp,
   bookEvent,
   confirmBooking
