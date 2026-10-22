@@ -8,5 +8,8 @@ const router = express.Router();
 // Get all events - api/events 
 router.get('/',protect,getAllEvents);
 
+// Get event by ID - api/events/:id
+router.get('/:id',protect,getEventById);
+
 
 module.exports = router;
