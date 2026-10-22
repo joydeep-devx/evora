@@ -42,6 +42,9 @@ const getEventById = async (req, res) => {
   }
 }
 
+/**
+ * Controller to create a new event in the database (Admin Only)
+ */
 const createEvent = async (req, res) => {
   try {
     const {title, description, date, location, category, totalSeats, availableSeats, ticketPrice, imageUrl} = req.body;
@@ -53,9 +56,10 @@ const createEvent = async (req, res) => {
       location,
       category,
       totalSeats,
-      availableSeats,
-      ticketPrice,
-      imageUrl
+      availableSeats: totalSeats,
+      ticketPrice: ticketPrice || 0,
+      image: image || '',
+      createdBy: req.user.id
     });
 
     res.status(201).json(event);
@@ -66,9 +70,27 @@ const createEvent = async (req, res) => {
   }
 }
 
+/**
+ * Controller to update an existing event in the database (Admin Only)
+ */
+const updateEvent = async (req, res) =>{
+  try{
+    const event = await eventModel.findByIdAndUpdate(req.params.id,req.body,{new:true});
+    if(!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+    res.status(200).json(event);
+  }
+  catch(error){
+    console.error('Error in updateEvent:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
+
+
 module.exports = {
   getAllEvents,
   getEventById,
-  createEvent
+  createEvent,
+  updateEvent,
 }
-
