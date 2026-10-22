@@ -30,7 +30,7 @@ const sendBookingOtp = async (req, res) => {
     await otpModel.findOneAndDelete({ email: req.user.email, action: 'event_booking' }); // Delete any existing OTP for the user
     await otpModel.create({ email: req.user.email, otp, action: 'event_booking' }); // Store the new OTP with a 5-minute expiration
     await sendOtpEmail(req.user.email, otp); // Send the OTP to the user's email 
-    res.json.status(200).json({ message: 'OTP sent to your email. Please verify to complete the booking.' });
+    res.status(200).json({ message: 'OTP sent to your email. Please verify to complete the booking.' });
 
   }
   catch (error) {
