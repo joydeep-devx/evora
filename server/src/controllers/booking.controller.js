@@ -142,11 +142,46 @@ const confirmBooking = async (req, res) => {
   }
 }
 
+const cancelBooking = async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.bookingId);
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    if (booking.userId.toString() !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Not authorized' });
+    }
+
+    if (booking.status === 'cancelled') return res.status(400).json({ message: 'Already cancelled' });
+
+    booking.status = 'cancelled';
+    await booking.save();
+
+    // Only restore the seat if it was actually confirmed and deducted
+    if (booking.status === 'confirmed') {
+      const event = await eventModel.findById(booking.eventId);
+
+      if (event) {
+        event.availableSeats += 1;
+        await event.save();
+      }
+    }
+
+    res.status(200).json({ message: 'Booking cancelled' });
+  }
+  catch (error) {
+    console.error('Error cancelling booking:', error);
+    res.status(500).json({ message: 'Failed to cancel booking. Please try again later.' });
+  }
+}
+
 
 
 module.exports = {
   getBookings,
   sendBookingOtp,
   bookEvent,
-  confirmBooking
+  confirmBooking,
+  cancelBooking
 }
