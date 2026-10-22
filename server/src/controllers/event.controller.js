@@ -87,10 +87,28 @@ const updateEvent = async (req, res) =>{
   }
 }
 
+/**
+ * Controller to delete an existing event from the database (Admin Only)
+ */
+const deleteEvent = async (req, res) => {
+  try{
+    const event = await eventModel.findByIdAndDelete(req.params.id);
+    if(!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+    res.status(200).json({ message: 'Event deleted successfully' });
+  }
+  catch(error){
+    console.error('Error in deleteEvent:', error);
+    res.status(500).json({ message: 'Server error' });
+  } 
+}
+
 
 module.exports = {
   getAllEvents,
   getEventById,
   createEvent,
   updateEvent,
+  deleteEvent
 }
