@@ -46,7 +46,62 @@ const registerUser = async (req, res) => {
   }
 }
 
+/**
+ * Login User
+ */
+const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ error: 'Invalid credentials Please Sign up first' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Invalid Email or Password' });
+    }
+
+    if (!user.isVerified && user.role === 'user') {
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      await otpModel.deleteMany({ email, action: 'account_verification' }); // Remove any existing OTPs for this email and action
+
+      await otpModel.create({
+        email,
+        otp,
+        action: 'account_verification',
+      });
+
+      await sendOtpEmail(email, otp, 'account_verification');
+      return res.status(400).json({ error: 'Account not verified. Please check a new OTP has been sent to your email.' });
+    }
+
+    const token = jwt.sign(
+      {
+        id: user._id,
+        role: user.role
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.status(200).json({
+      message: 'Login successful',
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      token
+    });
+  }
+  catch (error) {
+    console.error('Error in loginUser:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
 
 module.exports = {
-  registerUser
+  registerUser,
+  loginUser
 }
