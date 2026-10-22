@@ -31,7 +31,7 @@ const registerUser = async (req, res) => {
     await otpModel.create({
       email,
       otp,
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 minutes from now
+      action: 'account_verification',
     });
     await sendOtpEmail(email, otp, 'account_verification');
 
@@ -101,7 +101,45 @@ const loginUser = async (req, res) => {
   }
 }
 
+const verifyOtp = async (req, res) => {
+  try{
+    const { email, otp } = req.body;
+    const validOtp = await otpModel.findOne({ email, otp, action: 'account_verification' });
+
+    if (!validOtp) {
+      return res.status(400).json({ message: 'Invalid or expired OTP' });
+    } 
+
+    const user = await userModel.findOneAndUpdate({ email }, { isVerified: true });
+    await otpModel.deleteMany({ email, action: 'account_verification' }); // Remove all OTPs for this email and action after successful verification
+    
+    const token = jwt.sign(
+      {
+        id: user._id,
+        role: user.role
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.status(200).json(
+      { 
+        message: 'Account verified successfully',
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        token
+      });
+  }
+  catch (error) {
+    console.error('Error in verifyOtp:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
+
 module.exports = {
   registerUser,
-  loginUser
+  loginUser,
+  verifyOtp
 }
