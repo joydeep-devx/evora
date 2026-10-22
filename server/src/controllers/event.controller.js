@@ -58,7 +58,7 @@ const createEvent = async (req, res) => {
       totalSeats,
       availableSeats: totalSeats,
       ticketPrice: ticketPrice || 0,
-      image: image || '',
+      imageUrl: imageUrl || '',
       createdBy: req.user.id
     });
 
