@@ -58,8 +58,8 @@ const bookEvent = async (req, res) => {
     });
 
     await otpModel.deleteOne({ _id: validOtp._id }); // Delete the OTP after successful booking
-    
-    res.status(201).json({ message: 'Booking request submitted', booking});
+
+    res.status(201).json({ message: 'Booking request submitted', booking });
   }
   catch (error) {
     console.error('Error booking event:', error);
@@ -67,6 +67,63 @@ const bookEvent = async (req, res) => {
   }
 }
 
+const confirmBooking = async (req, res) => {
+  try {
+    const { paymentStatus } = req.body;
+    const booking = await Booking.findById(req.params.bookingId).populate('userId').populate('eventId');
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    if (booking.status === 'confirmed') {
+      return res.status(400).json({ message: 'Booking is already confirmed' });
+    }
+
+    // Validate payment status if provided
+    if (paymentStatus && !['paid', 'not_paid'].includes(paymentStatus)) {
+      return res.status(400).json({
+        message: 'Invalid payment status'
+      });
+    }
+
+    const event = await eventModel.findById(booking.eventId._id);
+    if (!event) {
+      return res.status(404).json({
+        message: 'Event not found'
+      });
+    }
+
+    if (event.availableSeats <= 0) {
+      return res.status(400).json({ message: 'No available seats for this event' });
+    }
+
+    booking.status = 'confirmed';
+
+    if (paymentStatus) {
+      booking.paymentStatus = paymentStatus;
+    }
+    await booking.save();
+
+    event.availableSeats -= 1;
+    await event.save();
+
+    // Send confirmation email
+    try {
+      await sendBookingEmail(booking.userId.email, booking.userId.name, booking.eventId.title);
+    } catch (emailError) {
+      console.error('Failed to send booking email:', emailError);
+    }
+
+    res.status(200).json({ message: 'Booking confirmed successfully', booking });
+  }
+  catch (error) {
+    console.error('Error confirming booking:', error);
+    res.status(500).json({ message: 'Failed to confirm booking. Please try again later.' });
+  }
+}
+
 module.exports = {
-  bookEvent
+  sendBookingOtp,
+  bookEvent,
+  confirmBooking
 }

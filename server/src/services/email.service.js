@@ -41,7 +41,7 @@ const sendOtpEmail = async (userEmail, otp, type) => {
 
 }
 
-const sendBookingEmail = async (userEmail, username, eventTitle) => {
+const   sendBookingEmail = async (userEmail, username, eventTitle) => {
   try {
     const mailOptions = {
       from: process.env.EMAIL_USER,
