@@ -1,4 +1,5 @@
 import React from "react";
+import api from '../utils/axios';
 export const AuthContext = React.createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -29,7 +30,7 @@ export const AuthProvider = ({ children }) => {
 
   const verifyOtp = async (email, otp) => {
     try {
-      const { data } = await api.post('/auth/verify-otp');
+      const { data } = await api.post('/auth/verify-otp',{ email, otp });
       setUser(data);
       localStorage.setItem("user", JSON.stringify(data));
       localStorage.setItem("token", data.token);
@@ -60,7 +61,7 @@ export const AuthProvider = ({ children }) => {
   }
   return (
     <AuthContext.Provider value={{ user, login, logout, loading, verifyOtp, register }}>
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 }
