@@ -11,14 +11,16 @@ import EventDetails from './pages/EventDetails.jsx'
 import MyBookings from './pages/MyBookings.jsx'
 import AdminBookings from './pages/admin/AdminBookings.jsx'
 import AdminEvents from './pages/admin/AdminEvents.jsx'
+import NotFound from './pages/NotFound.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 
-// Focused screens (auth forms, event details, my bookings, admin tools) don't show the footer.
-const PAGES_WITHOUT_FOOTER = ['/login', '/register', '/verify-otp', '/events/:id', '/bookings/my', '/admin/*']
+// Only the browsing pages show the footer; focused screens (auth, details,
+// bookings, admin) and the 404 page don't.
+const PAGES_WITH_FOOTER = ['/', '/events']
 
 const App = () => {
   const { pathname } = useLocation()
-  const showFooter = !PAGES_WITHOUT_FOOTER.some((pattern) => matchPath(pattern, pathname))
+  const showFooter = PAGES_WITH_FOOTER.some((pattern) => matchPath(pattern, pathname))
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -36,6 +38,8 @@ const App = () => {
           <Route path="/bookings/my" element={<ProtectedRoute role="user"><MyBookings /></ProtectedRoute>} />
           <Route path="/admin/bookings" element={<ProtectedRoute role="admin"><AdminBookings /></ProtectedRoute>} />
           <Route path="/admin/events" element={<ProtectedRoute role="admin"><AdminEvents /></ProtectedRoute>} />
+          {/* Anything else */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
       {showFooter && <Footer />}
