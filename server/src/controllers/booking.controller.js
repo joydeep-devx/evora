@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const bookingModel = require('../models/booking.model');
 const otpModel = require('../models/otp.model');
 const eventModel = require('../models/event.model');
@@ -90,46 +91,66 @@ const bookEvent = async (req, res) => {
 const confirmBooking = async (req, res) => {
   try {
     const { paymentStatus } = req.body;
-    const booking = await bookingModel.findById(req.params.bookingId).populate('userId').populate('eventId');
-    if (!booking) {
-      return res.status(404).json({ message: 'Booking not found' });
-    }
+    const { bookingId } = req.params;
 
-    if (booking.status === 'confirmed') {
-      return res.status(400).json({ message: 'Booking is already confirmed' });
-    }
-
-    // Validate payment status if provided
-    if (paymentStatus && !['paid', 'not_paid'].includes(paymentStatus)) {
+    // Validate payment status if provided (must match the schema enum)
+    if (paymentStatus && !['paid', 'unpaid'].includes(paymentStatus)) {
       return res.status(400).json({
         message: 'Invalid payment status'
       });
     }
 
-    const event = await eventModel.findById(booking.eventId._id);
+    if (!mongoose.isValidObjectId(bookingId)) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    // Step 1: atomically claim the booking. Only a *pending* booking can be confirmed,
+    // so two admins confirming at once can't both succeed, and cancelled bookings can't be revived.
+    const update = { status: 'confirmed' };
+    if (paymentStatus) update.paymentStatus = paymentStatus;
+
+    // new: false returns the booking as it was *before* the update, for rollback.
+    const previous = await bookingModel.findOneAndUpdate(
+      { _id: bookingId, status: 'pending' },
+      { $set: update },
+      { new: false }
+    );
+
+    if (!previous) {
+      const existing = await bookingModel.findById(bookingId);
+      if (!existing) {
+        return res.status(404).json({ message: 'Booking not found' });
+      }
+      return res.status(400).json({ message: `Booking is already ${existing.status}` });
+    }
+
+    // Step 2: atomically take a seat. The filter only matches while a seat is left,
+    // and $inc happens inside MongoDB, so parallel confirms can't overbook.
+    const event = await eventModel.findOneAndUpdate(
+      { _id: previous.eventId, availableSeats: { $gt: 0 } },
+      { $inc: { availableSeats: -1 } },
+      { new: true }
+    );
+
     if (!event) {
-      return res.status(404).json({
-        message: 'Event not found'
-      });
+      // No seat (or the event is gone): undo step 1.
+      await bookingModel.updateOne(
+        { _id: previous._id },
+        { $set: { status: previous.status, paymentStatus: previous.paymentStatus } }
+      );
+      const eventExists = await eventModel.exists({ _id: previous.eventId });
+      return eventExists
+        ? res.status(400).json({ message: 'No available seats for this event' })
+        : res.status(404).json({ message: 'Event not found' });
     }
 
-    if (event.availableSeats <= 0) {
-      return res.status(400).json({ message: 'No available seats for this event' });
-    }
-
-    booking.status = 'confirmed';
-
-    if (paymentStatus) {
-      booking.paymentStatus = paymentStatus;
-    }
-    await booking.save();
-
-    event.availableSeats -= 1;
-    await event.save();
+    const booking = await bookingModel.findById(previous._id)
+      .populate('userId', 'username email')
+      .populate('eventId');
 
     // Send confirmation email
     try {
-      await sendBookingEmail(booking.userId.email, booking.userId.name, booking.eventId.title);
+      await sendBookingEmail(booking.userId.email, booking.userId.username, booking.eventId.title);
     } catch (emailError) {
       console.error('Failed to send booking email:', emailError);
     }
