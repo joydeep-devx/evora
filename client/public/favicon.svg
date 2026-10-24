@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- A tilted coral event ticket (like the 404 page) with the logo's "e." in cream.
+       The "e" is a drawn path (bar + arc), so it looks the same on every system. -->
+  <g transform="rotate(-12 32 32)">
+    <path d="M12 10h40a6 6 0 0 1 6 6v10a6 6 0 0 0 0 12v10a6 6 0 0 1-6 6H12a6 6 0 0 1-6-6V38a6 6 0 0 0 0-12V16a6 6 0 0 1 6-6z" fill="#E11D48"/>
+    <path d="M22 33H38A8 8 0 1 0 36.1 38.1" fill="none" stroke="#FFF7ED" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="44" cy="39" r="3" fill="#FFF7ED"/>
+  </g>
+</svg>
