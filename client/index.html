@@ -9,6 +9,16 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <title>Evora | Book Your Event</title>
+  <!-- Pick the theme before anything paints, so dark-mode users never see a white flash.
+       Saved choice wins; otherwise follow the operating system. -->
+  <script>
+    try {
+      var saved = localStorage.getItem('theme');
+      if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      }
+    } catch (e) {}
+  </script>
 </head>
 
 <body>

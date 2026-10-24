@@ -18,6 +18,42 @@
   --on-danger-soft: #991B1B;
   --warning-soft: #FEF3C7;
   --on-warning-soft: #92400E;
+  color-scheme: light;
+}
+
+/* Coral Pop dark (from the design board). Same token names, so every
+   colour class (bg-surface, text-main ...) switches automatically. */
+.dark {
+  --background: #1A1414;
+  --surface: #261E1E;
+  --border: #3D3030;
+  --primary: #FB7185;
+  --on-primary: #1C1917;
+  --main: #FFF7ED;
+  --muted: #B8A9A4;
+  --primary-soft: #4C0519;
+  --on-primary-soft: #FDA4AF;
+  --accent-soft: #134E4A;
+  --on-accent-soft: #99F6E4;
+  --input-border: #5A4848;
+  --danger: #F87171;
+  --danger-soft: #450A0A;
+  --on-danger-soft: #FCA5A5;
+  --warning-soft: #451A03;
+  --on-warning-soft: #FCD34D;
+  /* Native bits (scrollbars, autofill) go dark too. */
+  color-scheme: dark;
+}
+
+/* Lets future components use dark: classes, keyed to the .dark class. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Added for a moment while the theme switches, so colours fade instead of snapping. */
+.theme-transition,
+.theme-transition *,
+.theme-transition *::before,
+.theme-transition *::after {
+  transition: background-color 0.35s ease, border-color 0.35s ease, color 0.35s ease, fill 0.35s ease !important;
 }
 
 @theme inline {

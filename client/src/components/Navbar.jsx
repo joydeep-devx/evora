@@ -3,6 +3,7 @@ import { Link, NavLink } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import { AuthContext } from '../context/AuthContext.jsx'
 import MotionLink from './MotionLink'
+import ThemeToggle from './ThemeToggle'
 import { buttonSpring } from '../utils/motion'
 
 const navLinkClass = ({ isActive }) => {
@@ -112,33 +113,38 @@ const Navbar = () => {
             evora<span className="text-primary">.</span>
           </Link>
 
-          {/* Desktop: full row of links */}
-          <div className="hidden md:flex items-center gap-2">
-            {links.map((link) => (
-              <NavItem key={link.to} to={link.to} pillId="nav-pill-desktop">{link.label}</NavItem>
-            ))}
-            <div className="ml-2 flex items-center gap-2">
-              <AccountActions user={user} isAdmin={isAdmin} onLogout={logout} />
+          <div className="flex items-center gap-2">
+            {/* Desktop: full row of links */}
+            <div className="hidden md:flex items-center gap-2">
+              {links.map((link) => (
+                <NavItem key={link.to} to={link.to} pillId="nav-pill-desktop">{link.label}</NavItem>
+              ))}
+              <div className="ml-2 flex items-center gap-2">
+                <AccountActions user={user} isAdmin={isAdmin} onLogout={logout} />
+              </div>
             </div>
-          </div>
 
-          {/* Mobile: menu toggle */}
-          <button
-            type="button"
-            onClick={() => setMenuOpen((open) => !open)}
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={menuOpen}
-            aria-controls="mobile-menu"
-            className="md:hidden flex h-11 w-11 items-center justify-center rounded-full border border-border text-main"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="h-5 w-5" aria-hidden="true">
-              {menuOpen ? (
-                <path d="M6 6l12 12M18 6L6 18" />
-              ) : (
-                <path d="M4 7h16M4 12h16M4 17h16" />
-              )}
-            </svg>
-          </button>
+            {/* One theme toggle for every screen size, always visible */}
+            <ThemeToggle />
+
+            {/* Mobile: menu toggle */}
+            <button
+              type="button"
+              onClick={() => setMenuOpen((open) => !open)}
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={menuOpen}
+              aria-controls="mobile-menu"
+              className="md:hidden flex h-11 w-11 items-center justify-center rounded-full border border-border text-main"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="h-5 w-5" aria-hidden="true">
+                {menuOpen ? (
+                  <path d="M6 6l12 12M18 6L6 18" />
+                ) : (
+                  <path d="M4 7h16M4 12h16M4 17h16" />
+                )}
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Mobile: dropdown panel */}
