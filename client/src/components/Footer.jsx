@@ -1,7 +1,6 @@
 import React, { useContext } from 'react'
 import { Link } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext.jsx'
-import MotionLink from './MotionLink'
 
 // Read once when the module loads; keeps render pure.
 const currentYear = new Date().getFullYear()

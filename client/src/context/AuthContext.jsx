@@ -2,24 +2,28 @@ import React from "react";
 import api from '../utils/axios';
 export const AuthContext = React.createContext();
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = React.useState(null);
-  const [loading, setLoading] = React.useState(true);
+// Read the saved session once, on first render (no effect needed).
+const readStoredUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem("user")) ?? null;
+  } catch {
+    return null;
+  }
+};
 
-  React.useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
-  }, []);
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = React.useState(readStoredUser);
+
+  const saveSession = (data) => {
+    setUser(data);
+    localStorage.setItem("user", JSON.stringify(data));
+    localStorage.setItem("token", data.token);
+  };
 
   const login = async (email, password) => {
     try {
       const { data } = await api.post('/auth/login', { email, password });
-      setUser(data);
-      localStorage.setItem("user", JSON.stringify(data));
-      localStorage.setItem("token", data.token);
+      saveSession(data);
       return data;
     }
     catch (error) {
@@ -30,10 +34,8 @@ export const AuthProvider = ({ children }) => {
 
   const verifyOtp = async (email, otp) => {
     try {
-      const { data } = await api.post('/auth/verify-otp',{ email, otp });
-      setUser(data);
-      localStorage.setItem("user", JSON.stringify(data));
-      localStorage.setItem("token", data.token);
+      const { data } = await api.post('/auth/verify-otp', { email, otp });
+      saveSession(data);
       return data;
     }
     catch (error) {
@@ -48,10 +50,11 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
   }
 
-  const register = async (name, email, password) => {
+  // Registration only creates an unverified account and emails a code.
+  // The user is logged in later, by verifyOtp().
+  const register = async (username, email, password) => {
     try {
-      const { data } = await api.post('/auth/register', { name, email, password });
-      setUser(data);
+      const { data } = await api.post('/auth/register', { username, email, password });
       return data;
     }
     catch (error) {
@@ -59,9 +62,10 @@ export const AuthProvider = ({ children }) => {
       throw error;
     }
   }
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading, verifyOtp, register }}>
-      {!loading && children}
+    <AuthContext.Provider value={{ user, login, logout, verifyOtp, register }}>
+      {children}
     </AuthContext.Provider>
   );
 }

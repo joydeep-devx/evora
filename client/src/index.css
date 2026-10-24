@@ -12,6 +12,10 @@
   --on-primary-soft: #9F1239;
   --accent-soft: #CCFBF1;
   --on-accent-soft: #115E59;
+  --input-border: #E7D5C8;
+  --danger: #B91C1C;
+  --danger-soft: #FEE2E2;
+  --on-danger-soft: #991B1B;
 }
 
 @theme inline {
@@ -26,6 +30,10 @@
   --color-on-primary-soft: var(--on-primary-soft);
   --color-accent-soft: var(--accent-soft);
   --color-on-accent-soft: var(--on-accent-soft);
+  --color-input-border: var(--input-border);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-on-danger-soft: var(--on-danger-soft);
   --font-sans: "Poppins", system-ui, sans-serif;
 }
 
