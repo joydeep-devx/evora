@@ -90,7 +90,7 @@ const bookEvent = async (req, res) => {
 const confirmBooking = async (req, res) => {
   try {
     const { paymentStatus } = req.body;
-    const booking = await Booking.findById(req.params.bookingId).populate('userId').populate('eventId');
+    const booking = await bookingModel.findById(req.params.bookingId).populate('userId').populate('eventId');
     if (!booking) {
       return res.status(404).json({ message: 'Booking not found' });
     }
@@ -144,7 +144,7 @@ const confirmBooking = async (req, res) => {
 
 const cancelBooking = async (req, res) => {
   try {
-    const booking = await Booking.findById(req.params.bookingId);
+    const booking = await bookingModel.findById(req.params.bookingId);
     if (!booking) {
       return res.status(404).json({ message: 'Booking not found' });
     }
@@ -155,13 +155,13 @@ const cancelBooking = async (req, res) => {
 
     if (booking.status === 'cancelled') return res.status(400).json({ message: 'Already cancelled' });
 
+    const wasConfirmed = booking.status === 'confirmed';
     booking.status = 'cancelled';
     await booking.save();
 
     // Only restore the seat if it was actually confirmed and deducted
-    if (booking.status === 'confirmed') {
+    if (wasConfirmed) {
       const event = await eventModel.findById(booking.eventId);
-
       if (event) {
         event.availableSeats += 1;
         await event.save();
