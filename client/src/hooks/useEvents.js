@@ -42,3 +42,9 @@ export const upcomingEvents = (events) =>
   events
     .filter((event) => new Date(event.date) >= new Date())
     .sort((a, b) => new Date(a.date) - new Date(b.date))
+
+// Events that have already happened, most recent first.
+export const pastEvents = (events) =>
+  events
+    .filter((event) => new Date(event.date) < new Date())
+    .sort((a, b) => new Date(b.date) - new Date(a.date))

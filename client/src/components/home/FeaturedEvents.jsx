@@ -1,7 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { useEvents, upcomingEvents } from '../../hooks/useEvents'
 import { buttonSpring } from '../../utils/motion'
 import EventCard from '../EventCard'
 import MotionLink from '../MotionLink'
@@ -10,20 +9,45 @@ import EventGridSkeleton from '../ui/EventGridSkeleton'
 
 const FEATURED_COUNT = 3
 
-const FeaturedEvents = () => {
-  const { events: allEvents, status, retry } = useEvents()
+// A home-page row of up to 3 event cards. Reused for "Happening soon" and
+// "Recently wrapped up": the parent loads the events once (useEvents) and
+// passes the same result to each section along with its own filter.
+//
+// eventsState: { events, status, retry } from useEvents()
+// select:      (events) => the events for this section, already sorted
+// ended:       show the cards in their "event is over" style
+// showStates:  render login / error messages (only one section should,
+//              otherwise the same message appears twice)
+// hideWhenEmpty: render nothing at all when there are no events to show
+const FeaturedEvents = ({
+  eventsState,
+  select,
+  headingId,
+  title,
+  subtitle,
+  emptyTitle,
+  emptyText,
+  seeAllLink,
+  ended = false,
+  showStates = true,
+  hideWhenEmpty = false,
+}) => {
+  const { events: allEvents, status, retry } = eventsState
   // Derived from the fetched list on every render, so it never goes stale.
-  const events = upcomingEvents(allEvents).slice(0, FEATURED_COUNT)
+  const events = select(allEvents).slice(0, FEATURED_COUNT)
+
+  if (hideWhenEmpty && (status !== 'success' || events.length === 0)) return null
+  if (!showStates && (status === 'login' || status === 'error')) return null
 
   return (
-    <section aria-labelledby="featured-heading" className="pb-16">
+    <section aria-labelledby={headingId} className="pb-16">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 id="featured-heading" className="text-2xl md:text-3xl font-bold text-main">Happening soon</h2>
-          <p className="mt-1 text-muted">Grab a seat before they're gone.</p>
+          <h2 id={headingId} className="text-2xl md:text-3xl font-bold text-main">{title}</h2>
+          <p className="mt-1 text-muted">{subtitle}</p>
         </div>
-        {status === 'success' && events.length > 0 && (
-          <Link to="/events" className="font-semibold text-primary hover:text-on-primary-soft transition-colors">
+        {seeAllLink && status === 'success' && events.length > 0 && (
+          <Link to={seeAllLink} className="font-semibold text-primary hover:text-on-primary-soft transition-colors">
             See all events →
           </Link>
         )}
@@ -60,8 +84,8 @@ const FeaturedEvents = () => {
       )}
 
       {status === 'success' && events.length === 0 && (
-        <StateMessage title="No upcoming events yet">
-          <p className="text-muted">Check back soon — new events are added regularly.</p>
+        <StateMessage title={emptyTitle}>
+          <p className="text-muted">{emptyText}</p>
         </StateMessage>
       )}
 
@@ -76,7 +100,7 @@ const FeaturedEvents = () => {
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.4, ease: 'easeOut', delay: index * 0.08 }}
             >
-              <EventCard event={event} />
+              <EventCard event={event} ended={ended} />
             </motion.div>
           ))}
         </div>
