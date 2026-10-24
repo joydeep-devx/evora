@@ -16,6 +16,8 @@
   --danger: #B91C1C;
   --danger-soft: #FEE2E2;
   --on-danger-soft: #991B1B;
+  --warning-soft: #FEF3C7;
+  --on-warning-soft: #92400E;
 }
 
 @theme inline {
@@ -34,6 +36,8 @@
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
   --color-on-danger-soft: var(--on-danger-soft);
+  --color-warning-soft: var(--warning-soft);
+  --color-on-warning-soft: var(--on-warning-soft);
   --font-sans: "Poppins", system-ui, sans-serif;
 }
 
