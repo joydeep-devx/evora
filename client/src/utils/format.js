@@ -2,7 +2,7 @@
 
 export const formatPrice = (amount) => {
   if (!amount) return 'Free'
-  return amount.toLocaleString('en-US')
+  return "₹"+ amount.toLocaleString('en-IN')
 }
 
 export const formatEventDate = (isoDate) =>
