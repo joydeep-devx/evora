@@ -11,7 +11,7 @@ const { sendOtpEmail, sendBookingEmail } = require('../services/email.service');
 const getBookings = async (req, res) => {
   try {
     const bookings = req.user.role === 'admin'
-      ? await bookingModel.find().populate('eventId').populate('userId', 'name email').sort({ createdAt: -1 })
+      ? await bookingModel.find().populate('eventId').populate('userId', 'username email').sort({ createdAt: -1 })
       : await bookingModel.find({ userId: req.user.id }).populate('eventId').sort({ createdAt: -1 });
 
     res.status(200).json({ bookings });
