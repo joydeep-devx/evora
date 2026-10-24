@@ -1,12 +1,18 @@
 import React from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, useLocation } from 'react-router-dom'
 import Home from './pages/Home.jsx'
 import Login from './pages/Login.jsx'
 import Navbar from './components/Navbar.jsx'
 import Footer from './components/Footer.jsx'
 import Signup from './pages/Signup.jsx'
 
+// Focused auth screens don't show the footer.
+const PAGES_WITHOUT_FOOTER = ['/login', '/register', '/verify-otp']
+
 const App = () => {
+  const { pathname } = useLocation()
+  const showFooter = !PAGES_WITHOUT_FOOTER.includes(pathname)
+
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
@@ -18,7 +24,7 @@ const App = () => {
           <Route path="/register" element={<Signup />} />
         </Routes>
       </div>
-      <Footer />
+      {showFooter && <Footer />}
     </div>
   )
 }
