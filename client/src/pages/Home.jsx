@@ -2,6 +2,7 @@ import React from 'react'
 import { motion } from 'motion/react'
 import Hero from '../components/home/Hero'
 import FeaturedEvents from '../components/home/FeaturedEvents'
+import HowItWorks from '../components/home/HowItWorks'
 
 const Home = () => {
   return (
@@ -13,6 +14,7 @@ const Home = () => {
     >
       <Hero />
       <FeaturedEvents />
+      <HowItWorks />
     </motion.main>
   )
 }
