@@ -8,6 +8,10 @@
   --on-primary: #FFFFFF;
   --main: #1C1917;
   --muted: #6B5B53;
+  --primary-soft: #FFE4E6;
+  --on-primary-soft: #9F1239;
+  --accent-soft: #CCFBF1;
+  --on-accent-soft: #115E59;
 }
 
 @theme inline {
@@ -18,6 +22,10 @@
   --color-on-primary: var(--on-primary);
   --color-main: var(--main);
   --color-muted: var(--muted);
+  --color-primary-soft: var(--primary-soft);
+  --color-on-primary-soft: var(--on-primary-soft);
+  --color-accent-soft: var(--accent-soft);
+  --color-on-accent-soft: var(--on-accent-soft);
   --font-sans: "Poppins", system-ui, sans-serif;
 }
 
