@@ -1,64 +1,19 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
-import api from '../../utils/axios'
-import { AuthContext } from '../../context/AuthContext.jsx'
+import { useEvents, upcomingEvents } from '../../hooks/useEvents'
+import { buttonSpring } from '../../utils/motion'
 import EventCard from '../EventCard'
 import MotionLink from '../MotionLink'
+import StateMessage from '../ui/StateMessage'
+import EventGridSkeleton from '../ui/EventGridSkeleton'
 
 const FEATURED_COUNT = 3
 
-const buttonSpring = {
-  whileHover: { scale: 1.05 },
-  whileTap: { scale: 0.95 },
-  transition: { type: 'spring', stiffness: 400, damping: 17 },
-}
-
-// Soonest upcoming events first.
-const pickUpcoming = (events) =>
-  events
-    .filter((event) => new Date(event.date) >= new Date())
-    .sort((a, b) => new Date(a.date) - new Date(b.date))
-    .slice(0, FEATURED_COUNT)
-
-const Message = ({ title, children }) => (
-  <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-border px-6 py-12 text-center">
-    <p className="text-lg font-semibold text-main">{title}</p>
-    {children}
-  </div>
-)
-
 const FeaturedEvents = () => {
-  const { user } = useContext(AuthContext)
-  const [events, setEvents] = useState([])
-  // 'loading' | 'success' | 'login' | 'error'
-  const [status, setStatus] = useState('loading')
-  const [reloadKey, setReloadKey] = useState(0)
-
-  useEffect(() => {
-    let ignore = false
-
-    api.get('/events')
-      .then(({ data }) => {
-        if (ignore) return
-        setEvents(pickUpcoming(data))
-        setStatus('success')
-      })
-      .catch((error) => {
-        if (ignore) return
-        // The events API currently requires a login, so guests get a 401.
-        setStatus(error.response?.status === 401 ? 'login' : 'error')
-      })
-
-    return () => {
-      ignore = true
-    }
-  }, [user, reloadKey])
-
-  const retry = () => {
-    setStatus('loading')
-    setReloadKey((key) => key + 1)
-  }
+  const { events: allEvents, status, retry } = useEvents()
+  // Derived from the fetched list on every render, so it never goes stale.
+  const events = upcomingEvents(allEvents).slice(0, FEATURED_COUNT)
 
   return (
     <section aria-labelledby="featured-heading" className="pb-16">
@@ -74,16 +29,10 @@ const FeaturedEvents = () => {
         )}
       </div>
 
-      {status === 'loading' && (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true" aria-label="Loading events">
-          {Array.from({ length: FEATURED_COUNT }, (_, i) => (
-            <div key={i} className="h-80 animate-pulse rounded-3xl bg-border/60" />
-          ))}
-        </div>
-      )}
+      {status === 'loading' && <EventGridSkeleton count={FEATURED_COUNT} />}
 
       {status === 'login' && (
-        <Message title="Log in to see what's on">
+        <StateMessage title="Log in to see what's on">
           <p className="max-w-sm text-muted">Create a free account or log in to browse events and book your seat.</p>
           <div className="mt-2 flex flex-wrap justify-center gap-3">
             <MotionLink to="/login" className="rounded-full bg-primary px-6 py-3 font-semibold text-on-primary" {...buttonSpring}>
@@ -93,11 +42,11 @@ const FeaturedEvents = () => {
               Create an account
             </MotionLink>
           </div>
-        </Message>
+        </StateMessage>
       )}
 
       {status === 'error' && (
-        <Message title="Couldn't load events">
+        <StateMessage title="Couldn't load events">
           <p className="text-muted">Check your connection and try again.</p>
           <motion.button
             type="button"
@@ -107,13 +56,13 @@ const FeaturedEvents = () => {
           >
             Try again
           </motion.button>
-        </Message>
+        </StateMessage>
       )}
 
       {status === 'success' && events.length === 0 && (
-        <Message title="No upcoming events yet">
+        <StateMessage title="No upcoming events yet">
           <p className="text-muted">Check back soon — new events are added regularly.</p>
-        </Message>
+        </StateMessage>
       )}
 
       {status === 'success' && events.length > 0 && (

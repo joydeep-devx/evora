@@ -3,12 +3,7 @@ import { Link, NavLink } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import { AuthContext } from '../context/AuthContext.jsx'
 import MotionLink from './MotionLink'
-
-const buttonSpring = {
-  whileHover: { scale: 1.05 },
-  whileTap: { scale: 0.95 },
-  transition: { type: 'spring', stiffness: 400, damping: 17 },
-}
+import { buttonSpring } from '../utils/motion'
 
 const navLinkClass = ({ isActive }) => {
   return `relative isolate px-4 py-2 rounded-full font-semibold transition-colors ${isActive ? 'text-on-primary-soft' : 'text-muted hover:text-main'}`

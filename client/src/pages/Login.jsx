@@ -24,8 +24,9 @@ const Login = () => {
   const { user, login } = useContext(AuthContext)
   const navigate = useNavigate()
   const location = useLocation()
-  // Where to go after logging in (set later by protected routes).
-  const redirectTo = location.state?.from?.pathname ?? '/'
+  // Where to go after logging in (set by ProtectedRoute), keeping any ?query.
+  const from = location.state?.from
+  const redirectTo = from ? `${from.pathname}${from.search ?? ''}` : '/'
 
   const [values, setValues] = useState({ email: '', password: '' })
   const [errors, setErrors] = useState({})

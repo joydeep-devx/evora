@@ -6,6 +6,8 @@ import Navbar from './components/Navbar.jsx'
 import Footer from './components/Footer.jsx'
 import Signup from './pages/Signup.jsx'
 import VerifyOtp from './pages/VerifyOtp.jsx'
+import Events from './pages/Events.jsx'
+import ProtectedRoute from './components/ProtectedRoute.jsx'
 
 // Focused auth screens don't show the footer.
 const PAGES_WITHOUT_FOOTER = ['/login', '/register', '/verify-otp']
@@ -24,6 +26,7 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Signup />} />
           <Route path="/verify-otp" element={<VerifyOtp />} />
+          <Route path="/events" element={<ProtectedRoute><Events /></ProtectedRoute>} />
         </Routes>
       </div>
       {showFooter && <Footer />}
