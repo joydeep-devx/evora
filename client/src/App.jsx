@@ -8,10 +8,11 @@ import Signup from './pages/Signup.jsx'
 import VerifyOtp from './pages/VerifyOtp.jsx'
 import Events from './pages/Events.jsx'
 import EventDetails from './pages/EventDetails.jsx'
+import MyBookings from './pages/MyBookings.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 
-// Focused screens (auth forms, event details) don't show the footer.
-const PAGES_WITHOUT_FOOTER = ['/login', '/register', '/verify-otp', '/events/:id']
+// Focused screens (auth forms, event details, my bookings) don't show the footer.
+const PAGES_WITHOUT_FOOTER = ['/login', '/register', '/verify-otp', '/events/:id', '/bookings/my']
 
 const App = () => {
   const { pathname } = useLocation()
@@ -29,6 +30,8 @@ const App = () => {
           <Route path="/verify-otp" element={<VerifyOtp />} />
           <Route path="/events" element={<ProtectedRoute><Events /></ProtectedRoute>} />
           <Route path="/events/:id" element={<ProtectedRoute><EventDetails /></ProtectedRoute>} />
+          {/* Admins see everyone's bookings on their own page, so this one is users only. */}
+          <Route path="/bookings/my" element={<ProtectedRoute role="user"><MyBookings /></ProtectedRoute>} />
         </Routes>
       </div>
       {showFooter && <Footer />}
