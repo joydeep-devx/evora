@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AnimatePresence, motion } from 'motion/react'
+import { motion } from 'motion/react'
 import api from '../../utils/axios'
 import { AuthContext } from '../../context/AuthContext.jsx'
 import { buttonSpring } from '../../utils/motion'
@@ -22,7 +22,39 @@ const FILTERS = [
   { id: 'cancelled', label: 'Cancelled' },
 ]
 
-const smallButton = 'h-10 rounded-full px-4 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60'
+const PAGE_SIZE = 25
+
+const Pagination = ({ page, pageCount, first, last, total, onChange }) => (
+  <nav aria-label="Bookings pages" className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm">
+    <p className="text-muted">
+      Showing <span className="font-semibold text-main">{first}–{last}</span> of{' '}
+      <span className="font-semibold text-main">{total}</span>
+    </p>
+    {pageCount > 1 && (
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => onChange(page - 1)}
+          disabled={page === 1}
+          className="h-10 rounded-full border-2 border-border bg-surface px-4 font-semibold text-main transition-colors hover:border-primary/40 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          ← Previous
+        </button>
+        <span className="px-2 text-muted" aria-live="polite">Page {page} of {pageCount}</span>
+        <button
+          type="button"
+          onClick={() => onChange(page + 1)}
+          disabled={page === pageCount}
+          className="h-10 rounded-full border-2 border-border bg-surface px-4 font-semibold text-main transition-colors hover:border-primary/40 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          Next →
+        </button>
+      </div>
+    )}
+  </nav>
+)
+
+const smallButton ='h-10 rounded-full px-4 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60'
 
 const FilterTab = ({ label, count, active, onClick }) => (
   <button
@@ -127,6 +159,17 @@ const AdminBookings = () => {
   const [reloadKey, setReloadKey] = useState(0)
   const [filter, setFilter] = useState('all')
   const [query, setQuery] = useState('')
+  const [page, setPage] = useState(1)
+
+  // A new filter or search starts again from page 1.
+  const changeFilter = (id) => {
+    setFilter(id)
+    setPage(1)
+  }
+  const changeQuery = (text) => {
+    setQuery(text)
+    setPage(1)
+  }
 
   useEffect(() => {
     let ignore = false
@@ -165,6 +208,13 @@ const AdminBookings = () => {
       .some((text) => text?.toLowerCase().includes(search))
   })
 
+  // Only one page of rows is rendered, so the table stays fast with thousands of bookings.
+  const pageCount = Math.max(1, Math.ceil(visible.length / PAGE_SIZE))
+  // Clamp: confirming or cancelling can shrink the filtered list under the current page.
+  const currentPage = Math.min(page, pageCount)
+  const firstIndex = (currentPage - 1) * PAGE_SIZE
+  const pageRows = visible.slice(firstIndex, firstIndex + PAGE_SIZE)
+
   return (
     <motion.main
       className="max-w-7xl mx-auto px-4 py-10 md:py-14"
@@ -202,7 +252,7 @@ const AdminBookings = () => {
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <div role="tablist" aria-label="Filter bookings by status" className="flex flex-wrap gap-1">
               {FILTERS.map((f) => (
-                <FilterTab key={f.id} label={f.label} count={counts[f.id] ?? 0} active={filter === f.id} onClick={() => setFilter(f.id)} />
+                <FilterTab key={f.id} label={f.label} count={counts[f.id] ?? 0} active={filter === f.id} onClick={() => changeFilter(f.id)} />
               ))}
             </div>
             <label className="w-full sm:w-72">
@@ -210,7 +260,7 @@ const AdminBookings = () => {
               <input
                 type="search"
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => changeQuery(e.target.value)}
                 placeholder="Search name, email or event"
                 className="h-11 w-full rounded-full border-2 border-input-border bg-surface px-4 text-sm text-main outline-none transition-colors placeholder:text-muted/60 focus:border-primary focus:ring-4 focus:ring-primary-soft"
               />
@@ -224,7 +274,8 @@ const AdminBookings = () => {
               </p>
             </StateMessage>
           ) : (
-            <div className="overflow-x-auto rounded-3xl border border-border bg-surface">
+            <>
+            <div id="admin-bookings-table" className="overflow-x-auto rounded-3xl border border-border bg-surface">
               <table className="w-full min-w-[860px] border-collapse text-sm">
                 <thead>
                   <tr className="text-left text-xs uppercase tracking-wider text-muted">
@@ -236,14 +287,11 @@ const AdminBookings = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <AnimatePresence initial={false}>
-                    {visible.map((b) => (
+                    {pageRows.map((b) => (
                       <motion.tr
                         key={b._id}
-                        layout
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
                         className="border-b border-border/60 last:border-b-0"
                       >
@@ -275,10 +323,21 @@ const AdminBookings = () => {
                         </td>
                       </motion.tr>
                     ))}
-                  </AnimatePresence>
                 </tbody>
               </table>
             </div>
+            <Pagination
+              page={currentPage}
+              pageCount={pageCount}
+              first={firstIndex + 1}
+              last={firstIndex + pageRows.length}
+              total={visible.length}
+              onChange={(next) => {
+                setPage(next)
+                document.getElementById('admin-bookings-table')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }}
+            />
+            </>
           )}
         </>
       )}

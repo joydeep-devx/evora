@@ -10,12 +10,20 @@ import { BookingStatusBadge, PaymentBadge } from '../components/ui/StatusBadge'
 import StateMessage from '../components/ui/StateMessage'
 import MotionLink from '../components/MotionLink'
 
-// Active bookings first (soonest event first), cancelled ones last.
-const sortBookings = (bookings) =>
-  [...bookings].sort((a, b) => {
-    if ((a.status === 'cancelled') !== (b.status === 'cancelled')) return a.status === 'cancelled' ? 1 : -1
-    return new Date(a.eventId?.date ?? 0) - new Date(b.eventId?.date ?? 0)
+const eventTime = (booking) => new Date(booking.eventId?.date ?? 0).getTime()
+
+// Upcoming bookings first (soonest first), then past events (most recent first),
+// then cancelled bookings.
+const sortBookings = (bookings, now) => {
+  const group = (b) => {
+    if (b.status === 'cancelled') return 2
+    return eventTime(b) >= now ? 0 : 1
+  }
+  return [...bookings].sort((a, b) => {
+    if (group(a) !== group(b)) return group(a) - group(b)
+    return group(a) === 1 ? eventTime(b) - eventTime(a) : eventTime(a) - eventTime(b)
   })
+}
 
 const DateTile = ({ date }) => {
   const d = date ? new Date(date) : null
@@ -27,7 +35,8 @@ const DateTile = ({ date }) => {
   )
 }
 
-const BookingRow = ({ booking, onCancelled }) => {
+// isPast: the event already happened, so the booking can't be cancelled any more.
+const BookingRow = ({ booking, isPast, onCancelled }) => {
   const event = booking.eventId // populated event, or null if it was deleted
   const [confirming, setConfirming] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -75,7 +84,11 @@ const BookingRow = ({ booking, onCancelled }) => {
         <BookingStatusBadge status={booking.status} />
         <PaymentBadge paymentStatus={booking.paymentStatus} />
 
-        {booking.status !== 'cancelled' && (
+        {isPast && booking.status !== 'cancelled' && (
+          <span className="px-2 text-sm text-muted">Event ended</span>
+        )}
+
+        {!isPast && booking.status !== 'cancelled' && (
           <AnimatePresence mode="wait" initial={false}>
             {confirming ? (
               <motion.div
@@ -130,6 +143,8 @@ const MyBookings = () => {
   // 'loading' | 'success' | 'error' | 'login'
   const [status, setStatus] = useState('loading')
   const [reloadKey, setReloadKey] = useState(0)
+  // Captured once; keeps render pure.
+  const [now] = useState(() => Date.now())
 
   useEffect(() => {
     let ignore = false
@@ -157,7 +172,7 @@ const MyBookings = () => {
   const markCancelled = (id) =>
     setBookings((prev) => prev.map((b) => (b._id === id ? { ...b, status: 'cancelled' } : b)))
 
-  const sorted = sortBookings(bookings)
+  const sorted = sortBookings(bookings, now)
 
   return (
     <motion.main
@@ -207,7 +222,7 @@ const MyBookings = () => {
       {status === 'success' && sorted.length > 0 && (
         <ul className="flex flex-col gap-3">
           {sorted.map((booking) => (
-            <BookingRow key={booking._id} booking={booking} onCancelled={markCancelled} />
+            <BookingRow key={booking._id} booking={booking} isPast={eventTime(booking) < now} onCancelled={markCancelled} />
           ))}
         </ul>
       )}

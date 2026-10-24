@@ -54,8 +54,8 @@ const Hero = () => {
       {/* Right Section */}
       <div className='h-64 w-full overflow-hidden rounded-[28px] md:h-[450px]'>
         <motion.img
-          src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
-          alt=""
+          src="/heroImage.png"
+          alt="Concert crowd with hands raised in front of a glowing stage"
           className='w-full h-full object-cover'
           whileHover={{ scale: 1.05 }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
