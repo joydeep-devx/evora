@@ -10,6 +10,7 @@ import Events from './pages/Events.jsx'
 import EventDetails from './pages/EventDetails.jsx'
 import MyBookings from './pages/MyBookings.jsx'
 import AdminBookings from './pages/admin/AdminBookings.jsx'
+import AdminEvents from './pages/admin/AdminEvents.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 
 // Focused screens (auth forms, event details, my bookings, admin tools) don't show the footer.
@@ -34,6 +35,7 @@ const App = () => {
           {/* Admins see everyone's bookings on their own page, so this one is users only. */}
           <Route path="/bookings/my" element={<ProtectedRoute role="user"><MyBookings /></ProtectedRoute>} />
           <Route path="/admin/bookings" element={<ProtectedRoute role="admin"><AdminBookings /></ProtectedRoute>} />
+          <Route path="/admin/events" element={<ProtectedRoute role="admin"><AdminEvents /></ProtectedRoute>} />
         </Routes>
       </div>
       {showFooter && <Footer />}

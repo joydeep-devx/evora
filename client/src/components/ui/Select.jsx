@@ -5,7 +5,14 @@ import { AnimatePresence, motion } from 'motion/react'
 // On-brand replacement for <select>. Native option lists are drawn by the OS
 // (the blue highlight), so this renders its own listbox, with keyboard support.
 // options: [{ value, label }]
-const Select = ({ value, onChange, options, disabled = false, ariaLabel, className = '' }) => {
+// sm: compact pill (tables); md: matches FormField inputs (forms).
+const SIZES = {
+  sm: 'h-10 rounded-full text-sm font-semibold',
+  md: 'h-12 w-full rounded-2xl text-base text-main',
+}
+
+// Name it with `ariaLabel`, or point `labelledBy` at a visible label's id.
+const Select = ({ value, onChange, options, disabled = false, ariaLabel, labelledBy, size = 'sm', className = '' }) => {
   const id = useId()
   const buttonRef = useRef(null)
   const listRef = useRef(null)
@@ -106,10 +113,12 @@ const Select = ({ value, onChange, options, disabled = false, ariaLabel, classNa
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={open ? `${id}-list` : undefined}
-        aria-label={ariaLabel ? `${ariaLabel}: ${selected?.label}` : undefined}
+        id={`${id}-button`}
+        aria-label={ariaLabel && !labelledBy ? `${ariaLabel}: ${selected?.label}` : undefined}
+        aria-labelledby={labelledBy ? `${labelledBy} ${id}-button` : undefined}
         onClick={() => (open ? close() : openList())}
         onKeyDown={onButtonKeyDown}
-        className={`relative flex h-10 items-center rounded-full border-2 bg-surface pl-4 pr-9 text-sm font-semibold outline-none transition-colors focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary-soft disabled:cursor-not-allowed disabled:opacity-60 ${className}`}
+        className={`relative flex items-center border-2 bg-surface pl-4 pr-9 outline-none ${SIZES[size]} transition-colors focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary-soft disabled:cursor-not-allowed disabled:opacity-60 ${className}`}
       >
         {selected?.label}
         <motion.svg
@@ -131,7 +140,8 @@ const Select = ({ value, onChange, options, disabled = false, ariaLabel, classNa
               id={`${id}-list`}
               role="listbox"
               tabIndex={-1}
-              aria-label={ariaLabel}
+              aria-label={labelledBy ? undefined : ariaLabel}
+              aria-labelledby={labelledBy}
               aria-activedescendant={`${id}-opt-${activeIndex}`}
               onKeyDown={onListKeyDown}
               initial={{ opacity: 0, y: -4, scale: 0.97 }}
