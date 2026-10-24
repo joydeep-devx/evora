@@ -61,8 +61,8 @@ const bookEvent = async (req, res) => {
       return res.status(400).json({ message: 'No available seats for this event' });
     }
 
-    const existingBooking = await bookingModel.findOne({ user: req.user._id, event: eventId });
-    if (existingBooking && existingBooking.status !== 'cancelled') {
+    const existingBooking = await bookingModel.findOne({ userId: req.user._id, eventId: event._id, status: { $ne: 'cancelled' } });
+    if (existingBooking) {
       return res.status(400).json({ message: 'Already Booked or Pending' });
     }
 
@@ -71,7 +71,7 @@ const bookEvent = async (req, res) => {
       eventId: event._id,
       status: 'pending',
       paymentStatus: 'unpaid',
-      amount: event.price
+      amount: event.ticketPrice
     });
 
     await otpModel.deleteOne({ _id: validOtp._id }); // Delete the OTP after successful booking
