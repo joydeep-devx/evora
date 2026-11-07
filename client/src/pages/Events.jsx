@@ -1,7 +1,6 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
-import { AuthContext } from '../context/AuthContext.jsx'
 import { useEvents, upcomingEvents } from '../hooks/useEvents'
 import { buttonSpring } from '../utils/motion'
 import EventCard from '../components/EventCard'
@@ -30,7 +29,6 @@ const CategoryChip = ({ label, active, onClick }) => (
 )
 
 const Events = () => {
-  const { logout } = useContext(AuthContext)
   const { events: allEvents, status, retry } = useEvents()
   // The selected category lives in the URL (?category=Music) so footer links and shared URLs work.
   const [searchParams, setSearchParams] = useSearchParams()
@@ -88,20 +86,6 @@ const Events = () => {
             {...buttonSpring}
           >
             Try again
-          </motion.button>
-        </StateMessage>
-      )}
-
-      {status === 'login' && (
-        <StateMessage title="Your session has expired">
-          <p className="text-muted">Please log in again to see events.</p>
-          <motion.button
-            type="button"
-            onClick={logout}
-            className="mt-2 rounded-full bg-primary px-6 py-3 font-semibold text-on-primary"
-            {...buttonSpring}
-          >
-            Log in again
           </motion.button>
         </StateMessage>
       )}

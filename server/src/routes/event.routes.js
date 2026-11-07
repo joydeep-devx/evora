@@ -5,10 +5,10 @@ const { getAllEvents , getEventById , createEvent , updateEvent , deleteEvent} =
 const router = express.Router();
 
 
-// Get all events - api/events 
-router.get('/',protect,getAllEvents);
+// Get all events, card fields only (Public) - api/events
+router.get('/',getAllEvents);
 
-// Get event by ID - api/events/:id
+// Get full event details (Login required) - api/events/:id
 router.get('/:id',protect,getEventById);
 
 // Create a new event (Admin Only) - api/events

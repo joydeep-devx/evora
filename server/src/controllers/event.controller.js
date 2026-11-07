@@ -2,7 +2,9 @@ const eventModel = require('../models/event.model');
 
 
 /**
- * Controller to get all events from the database
+ * Controller to get all events from the database.
+ * This route is public, so it leaves out what requires a login: the full description
+ * (see getEventById) and the admin who created the event.
  */
 const getAllEvents = async (req, res) => {
   try{
@@ -16,7 +18,7 @@ const getAllEvents = async (req, res) => {
       filters.ticketPrice = req.query.ticketPrice;
     }
 
-    const events = await eventModel.find();
+    const events = await eventModel.find().select('-description -createdBy');
     res.status(200).json(events);
   }
   catch(error){

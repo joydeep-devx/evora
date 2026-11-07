@@ -1,11 +1,8 @@
-import { useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import api from '../utils/axios'
-import { AuthContext } from '../context/AuthContext.jsx'
 
-// Loads all events. status: 'loading' | 'success' | 'login' | 'error'
-// ('login' = the API refused us with a 401: logged out, or the token expired).
+// Loads all events (public: no login needed). status: 'loading' | 'success' | 'error'
 export const useEvents = () => {
-  const { user } = useContext(AuthContext)
   const [events, setEvents] = useState([])
   const [status, setStatus] = useState('loading')
   const [reloadKey, setReloadKey] = useState(0)
@@ -19,15 +16,14 @@ export const useEvents = () => {
         setEvents(data)
         setStatus('success')
       })
-      .catch((error) => {
-        if (ignore) return
-        setStatus(error.response?.status === 401 ? 'login' : 'error')
+      .catch(() => {
+        if (!ignore) setStatus('error')
       })
 
     return () => {
       ignore = true
     }
-  }, [user, reloadKey])
+  }, [reloadKey])
 
   const retry = () => {
     setStatus('loading')

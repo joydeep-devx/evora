@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { buttonSpring } from '../../utils/motion'
 import EventCard from '../EventCard'
-import MotionLink from '../MotionLink'
 import StateMessage from '../ui/StateMessage'
 import EventGridSkeleton from '../ui/EventGridSkeleton'
 
@@ -16,7 +15,7 @@ const FEATURED_COUNT = 3
 // eventsState: { events, status, retry } from useEvents()
 // select:      (events) => the events for this section, already sorted
 // ended:       show the cards in their "event is over" style
-// showStates:  render login / error messages (only one section should,
+// showStates:  render the error message (only one section should,
 //              otherwise the same message appears twice)
 // hideWhenEmpty: render nothing at all when there are no events to show
 const FeaturedEvents = ({
@@ -37,7 +36,7 @@ const FeaturedEvents = ({
   const events = select(allEvents).slice(0, FEATURED_COUNT)
 
   if (hideWhenEmpty && (status !== 'success' || events.length === 0)) return null
-  if (!showStates && (status === 'login' || status === 'error')) return null
+  if (!showStates && status === 'error') return null
 
   return (
     <section aria-labelledby={headingId} className="pb-16">
@@ -54,20 +53,6 @@ const FeaturedEvents = ({
       </div>
 
       {status === 'loading' && <EventGridSkeleton count={FEATURED_COUNT} />}
-
-      {status === 'login' && (
-        <StateMessage title="Log in to see what's on">
-          <p className="max-w-sm text-muted">Create a free account or log in to browse events and book your seat.</p>
-          <div className="mt-2 flex flex-wrap justify-center gap-3">
-            <MotionLink to="/login" className="rounded-full bg-primary px-6 py-3 font-semibold text-on-primary" {...buttonSpring}>
-              Log in
-            </MotionLink>
-            <MotionLink to="/register" className="rounded-full border-2 border-border bg-surface px-6 py-3 font-semibold text-main" {...buttonSpring}>
-              Create an account
-            </MotionLink>
-          </div>
-        </StateMessage>
-      )}
 
       {status === 'error' && (
         <StateMessage title="Couldn't load events">

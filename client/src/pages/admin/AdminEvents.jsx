@@ -121,6 +121,7 @@ const AdminEvents = () => {
   const [reloadKey, setReloadKey] = useState(0)
   const [editingId, setEditingId] = useState(null)
   const [savedNotice, setSavedNotice] = useState('')
+  const [editError, setEditError] = useState('')
   // Captured once; keeps render pure.
   const [now] = useState(() => new Date())
 
@@ -170,11 +171,19 @@ const AdminEvents = () => {
     setSavedNotice('Event deleted.')
   }
 
-  const startEdit = (id) => {
-    setEditingId(id)
+  const startEdit = async (id) => {
     setSavedNotice('')
-    // On small screens the form sits below the table, so bring it into view.
-    document.getElementById('event-form-heading')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    setEditError('')
+    try {
+      // The list only has card fields, but the form also needs the full description.
+      const { data } = await api.get(`/events/${id}`)
+      setEvents((prev) => prev.map((e) => (e._id === id ? data : e)))
+      setEditingId(id)
+      // On small screens the form sits below the table, so bring it into view.
+      document.getElementById('event-form-heading')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    } catch (error) {
+      setEditError(getApiErrorMessage(error, 'Could not load this event for editing.'))
+    }
   }
 
   return (
@@ -228,6 +237,10 @@ const AdminEvents = () => {
                 )}
               </AnimatePresence>
             </div>
+
+            {editError && (
+              <div role="alert" className="rounded-2xl bg-danger-soft px-4 py-3 text-sm font-medium text-on-danger-soft">{editError}</div>
+            )}
 
             {events.length === 0 ? (
               <StateMessage title="No events yet">
