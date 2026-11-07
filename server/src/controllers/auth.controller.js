@@ -104,13 +104,23 @@ const loginUser = async (req, res) => {
 const verifyOtp = async (req, res) => {
   try{
     const { email, otp } = req.body;
+
+    // Must be plain strings: an object here would act as a database query operator.
+    if (typeof email !== 'string' || typeof otp !== 'string' || !/^\d{6}$/.test(otp)) {
+      return res.status(400).json({ message: 'Invalid or expired OTP' });
+    }
+
     const validOtp = await otpModel.findOne({ email, otp, action: 'account_verification' });
 
     if (!validOtp) {
       return res.status(400).json({ message: 'Invalid or expired OTP' });
-    } 
+    }
 
     const user = await userModel.findOneAndUpdate({ email }, { isVerified: true });
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired OTP' });
+    }
+
     await otpModel.deleteMany({ email, action: 'account_verification' }); // Remove all OTPs for this email and action after successful verification
     
     const token = jwt.sign(
