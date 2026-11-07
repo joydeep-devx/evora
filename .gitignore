@@ -147,3 +147,7 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# Local-only: demo data and backend tests
+server/seed.js
+server/tests/
