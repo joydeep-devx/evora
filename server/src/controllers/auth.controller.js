@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const userModel = require('../models/user.model');
 const otpModel = require('../models/otp.model');
 const { sendOtpEmail } = require('../services/email.service');
+const { checkOtp } = require('../services/otp.service');
 
 /**
  * Register User
@@ -110,7 +111,7 @@ const verifyOtp = async (req, res) => {
       return res.status(400).json({ message: 'Invalid or expired OTP' });
     }
 
-    const validOtp = await otpModel.findOne({ email, otp, action: 'account_verification' });
+    const validOtp = await checkOtp(email, 'account_verification', otp);
 
     if (!validOtp) {
       return res.status(400).json({ message: 'Invalid or expired OTP' });

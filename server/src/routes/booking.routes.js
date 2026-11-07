@@ -1,5 +1,6 @@
 const express = require('express');
 const { protect, admin } = require('../middlewares/auth.middleware');
+const { sendOtpLimiter } = require('../middlewares/rateLimit.middleware');
 const { getBookings, sendBookingOtp, bookEvent, confirmBooking, cancelBooking } = require('../controllers/booking.controller');
 const router = express.Router();
 
@@ -8,7 +9,7 @@ const router = express.Router();
 router.get('/my', protect, getBookings);
 
 // Book an event - api/bookings
-router.post('/send-otp', protect, sendBookingOtp);
+router.post('/send-otp', protect, sendOtpLimiter, sendBookingOtp);
 
 // Book an event after verifying the OTP - api/bookings
 router.post('/', protect, bookEvent);

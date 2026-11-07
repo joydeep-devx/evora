@@ -3,6 +3,7 @@ const bookingModel = require('../models/booking.model');
 const otpModel = require('../models/otp.model');
 const eventModel = require('../models/event.model');
 const { sendOtpEmail, sendBookingEmail } = require('../services/email.service');
+const { checkOtp } = require('../services/otp.service');
 
 
 /**
@@ -48,7 +49,7 @@ const bookEvent = async (req, res) => {
     const { eventId, otp } = req.body;
 
     // Verify OTP explicitly before proceeding
-    const validOtp = await otpModel.findOne({ email: req.user.email, otp, action: 'event_booking' });
+    const validOtp = await checkOtp(req.user.email, 'event_booking', otp);
     if (!validOtp) {
       return res.status(400).json({ message: 'Invalid or Expired OTP for booking' });
     }

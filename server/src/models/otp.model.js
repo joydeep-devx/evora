@@ -16,7 +16,11 @@ const otpSchema = new mongoose.Schema({
   },
   action:{
     type: String,
-    enum: ['account_verification', 'event_booking'],  
+    enum: ['account_verification', 'event_booking'],
+  },
+  attempts: {
+    type: Number,
+    default: 0, // Tries so far; see otp.service.js
   }
 });
 
