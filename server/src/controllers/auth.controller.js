@@ -54,6 +54,11 @@ const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Must be plain strings: an object here would act as a database query operator.
+    if (typeof email !== 'string' || typeof password !== 'string') {
+      return res.status(400).json({ error: 'Invalid Email or Password' });
+    }
+
     const user = await userModel.findOne({ email });
     if (!user) {
       return res.status(400).json({ error: 'Invalid credentials Please Sign up first' });
