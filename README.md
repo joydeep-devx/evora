@@ -48,7 +48,7 @@
 | 🟢 **Backend** | Node.js, Express 5 |
 | 🍃 **Database** | MongoDB, Mongoose 9 |
 | 🔐 **Auth** | JSON Web Tokens, bcryptjs |
-| 📧 **Email** | Nodemailer (Gmail) |
+| 📧 **Email** | Nodemailer with Brevo SMTP |
 | 🚦 **Rate Limiting** | express-rate-limit |
 
 ## 🚀 Getting Started
@@ -57,7 +57,7 @@
 
 - 🟢 [Node.js](https://nodejs.org) 20.19+ or 22.12+
 - 🍃 A MongoDB database (local or [MongoDB Atlas](https://cloud.mongodb.com))
-- 📧 A Gmail account with an [app password](https://support.google.com/accounts/answer/185833) for sending emails
+- 📧 A free [Brevo](https://www.brevo.com) account for sending emails, with your sender address verified
 
 ### Installation
 
@@ -116,9 +116,14 @@ MONGO_URI=your_mongodb_connection_string
 # Used to sign login tokens (use a long random string)
 JWT_SECRET=a_long_random_string
 
-# Gmail account used to send codes
-EMAIL_USER=your_gmail_address
-EMAIL_PASS=your_gmail_app_password
+# Sender address (must be a verified sender in Brevo)
+EMAIL_USER=your_sender_email
+
+# Brevo SMTP (find these under SMTP & API in Brevo)
+SMTP_HOST=smtp-relay.brevo.com
+SMTP_PORT=2525
+SMTP_USER=your_brevo_smtp_login
+SMTP_PASS=your_brevo_smtp_key
 ```
 
 **`client/.env`**
